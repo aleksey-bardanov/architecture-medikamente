@@ -1,0 +1,57 @@
+@startuml Basic Sample
+
+title Архитектура системы медикаменте контейнеры
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(patient, "Пациент")
+Person(doctor, "Специалист медик")
+Person(administrator, "Сотрудник ресепшена")
+Person(bookkeeper, "Бухгалтер")
+Person(warehouse_keeper, "Сотрудник склада")
+Person(data_analyst, "Аналитик данных")
+
+System_Ext(laboratory, "Лаборатория", "Проводит лабораторные исследования")
+
+System_Boundary(medikamente, "Медикаменте", "Оказывает медицинские услуги") {
+    Container(payment_getaway, "Платежный шлюз", "Software System", "Обрабатывает платежи")
+    Container(smtp, "Почтовый сервис", "Software System", "Внутренняя почта")
+
+    Container(clients_portal, "Портал для пациентов", "React.js", "Регистрация, запись, оплата")
+    Container(admin_portal, "Портал для сотрудников", "React.js", "Управление пользователями и записями")
+
+    Container(crm, "CRM", "Java, Spring Boot", "Система управления взаимоотношениями с клиентами")
+    Container(1c_accounting, "1С Бухгалтерия", "Software System")
+    Container(1c_warehouse, "1С Склад", "Software System")
+
+    Container(data_extractor, "Apache NiFi", "Software System", "Получает данные, подготавливает и передает в хранилище")
+    Container(data_metadata, "Apache Atlas", "Software System", "Разметка данных, мониторинг, линеаризация")
+    Container(data_defense, "Apache Ranger", "Software System", "Авторизация для доступа к данным")
+    Container(data_analysis, "Apache Spark", "Software System", "Извлекает и данные из хранилища для анализа")
+    ContainerDb(data_storage, "HDFS, Apache Hive", "Software System", "Хранилище данных системы Медикаменте")
+}
+
+Rel_U(data_extractor, data_storage, "Сохраняет собранные данные", "files")
+Rel_R(data_metadata, data_storage, "Обрабатывает данные")
+Rel_D(data_defense, data_metadata, "Проверяет разрешения при авторизации")
+Rel_R(data_defense, data_storage, "Управляет доступом")
+
+Rel_L(data_extractor, smtp, "Получает данные из писем", "REST")
+Rel_R(data_extractor, laboratory, "Получает результаты анализов", "REST")
+Rel_L(data_analysis, data_storage, "Получает данные", "SQL, RDD")
+
+Rel_D(clients_portal, crm, "Использует", "REST")
+Rel_D(admin_portal, crm, "Использует", "REST")
+Rel_D(1c_accounting, data_storage, "Движение денежных средств", "SQL")
+Rel_D(1c_warehouse, data_storage, "Операции с ТМЦ", "SQL")
+Rel_D(crm, data_storage, "Регистрация пациентов, записи, результаты анализов", "SQL")
+Rel_D(clients_portal, payment_getaway, "Использует", "REST")
+
+Rel_D(bookkeeper, 1c_accounting, "Обрабатывает платежи")
+Rel_D(warehouse_keeper, 1c_warehouse, "Ведет учет ТМЦ")
+Rel_D(patient, clients_portal, "Использует")
+Rel_D(administrator, admin_portal, "Использует")
+Rel_D(doctor, admin_portal, "Использует")
+Rel_D(data_analyst, data_analysis, "Анализирует данные", "Scripts, SQL")
+
+@enduml

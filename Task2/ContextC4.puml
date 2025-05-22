@@ -1,0 +1,32 @@
+@startuml 
+
+title Контекст информационной системы компании Medikamente
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(patient, "Пациент")
+Person(doctor, "Специалист медик")
+Person(administrator, "Сотрудник ресепшена")
+Person(bookkeeper, "Бухгалтер")
+Person(warehouse_keeper, "Сотрудник склада")
+Person(cashier, "Кассир")
+Person(data_analyst, "Аналитик данных, ML-инженер")
+
+System(medikamente, "Медикаменте", "Оказывает медицинские услуги")
+System_Ext(laboratory, "Лаборатория", "Проводит лабораторные исследования")
+
+
+Rel_D(patient, cashier, "Производит оплату")
+Rel_D(patient, administrator, "Регистрируется, записывается на прием")
+Rel_D(patient, doctor, "Получает мед.помощь")
+
+Rel_D(cashier, medikamente, "Принимает оплату")
+Rel_D(administrator, medikamente, "Регистрирует пациента, записывает на прием")
+Rel_D(doctor, medikamente, "Проверяет и редактирует записи")
+
+Rel_U(bookkeeper, medikamente, "Обрабатывает платежи")
+Rel_U(warehouse_keeper, medikamente, "Ведет учет ТМЦ")
+Rel_U(laboratory, medikamente, "Передает результаты исследований")
+
+Rel_L(data_analyst, medikamente, "Проводит аналитику данных, обучает LLM")
+@enduml
